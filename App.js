@@ -14,7 +14,7 @@ import Todo from './components/Todo'
 
 import fs from 'react-native-fs'
 
-const fileLocation = fs.CachesDirectoryPath + '/TodoListNative_cache.json';
+const fileLocation = fs.DocumentDirectoryPath + '/TodoListNative_cache.json';
 
 let App = () => {
     let [todos, setTodos] = useState([])
