@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import {
     View,
@@ -12,20 +12,33 @@ import {
 import { H1, ButtonText } from './components/Text'
 import Todo from './components/Todo'
 
+import fs from 'react-native-fs'
+
+const fileLocation = fs.CachesDirectoryPath + '/TodoListNative_cache.json';
+
 let App = () => {
     let [todos, setTodos] = useState([])
     let [input, setInput] = useState('')
     
     const onPress = () => {
         setInput('')
-        if(input.length)
-            setTodos((prev) => [...prev, { id: new Date().getTime(), title: input }])
+        if(input.length) {
+            setTodos((prev) => {
+                const newState = [...prev, { id: new Date().getTime(), title: input }]
+                fs.writeFile(fileLocation, JSON.stringify(newState))
+                return newState
+            })
+        }
         else
             errorHandle()
     }
 
     const onRemove = (id) => {
-        setTodos((prev) => prev.filter(item => item.id !== id))
+        setTodos((prev) => {
+            const newState = prev.filter(item => item.id !== id)
+            fs.writeFile(fileLocation, JSON.stringify(newState))
+            return newState
+        })
     }
 
     const errorHandle = () => {
@@ -39,6 +52,17 @@ let App = () => {
             ]
         )
     }
+
+    useEffect(() => {
+        //fs.writeFile(fileLocation, '')
+        fs.exists(fileLocation)
+        .then(
+            () => { fs.readFile(fileLocation).then(data => setTodos(JSON.parse(data))) },
+            () => { fs.writeFile(fileLocation, '') }
+        )
+    }, [])
+
+
 
     return (
         <>
@@ -88,7 +112,7 @@ const styles = StyleSheet.create({
     },
     button: {
         height: 50,
-        width: 100,
+        minWidth: '25%',
         backgroundColor: '#009933',
         justifyContent: "center",
         borderTopEndRadius: 12,
